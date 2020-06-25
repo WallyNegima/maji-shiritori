@@ -1,28 +1,32 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Player
+      v-for="user in $whim.users"
+      :key="user.id"
+      :class="whimUserWindowClass(user)"
+      :displayUser="user"
+      :isLose="true"
+    />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
+    Player: () => import("@/components/Player/index")
+  },
+  computed: {
+    users() {
+      return this.$whim.usrs;
+    }
   }
-}
+};
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<style scoped>
+.main {
+  position: relative;
+  z-index: 1;
 }
 </style>
