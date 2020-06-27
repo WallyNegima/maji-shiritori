@@ -3,9 +3,9 @@
     <div id="mainContainer">
       <Main :mode="mode" />
       <div id="buttonContainer">
-        <NextButton v-if="gameState.gaming == true" :onClickHandler="nextPerson" />
+        <NextButton v-if="gameState.gaming == true && myTurn" :onClickHandler="nextPerson" />
         <GameStartButton
-          v-else
+          v-else-if="gameState.gaming != true"
           :onClickHandler="gameStart"
           :isFirstGame="gameState.isFirstGame == true"
         />
@@ -16,7 +16,8 @@
       :key="user.id"
       :class="whimUserWindowClass(user)"
       :displayUser="user"
-      :isLose="true"
+      :loserPositionIds="[]"
+      :turnPosition="gameState.turnPositionNumber"
     />
   </div>
 </template>
@@ -52,23 +53,48 @@ export default {
     users() {
       return this.$whim.usrs;
     },
+    me() {
+      return this.$whim.accessUser;
+    },
     mode() {
       return "clockwise";
     },
     gameState() {
       return this.$whim.state;
+    },
+    myTurn() {
+      return this.gameState.turnPositionNumber == this.me.positionNumber;
     }
   },
   methods: {
     nextPerson() {
-      console.debug("next!!");
+      this.$whim.assignState({
+        turnPositionNumber:
+          (this.gameState.turnPositionNumber % this.$whim.users.length) + 1
+      });
     },
     gameStart() {
+      if (this.gameState.loading && this.gameState.loading == true) {
+        return;
+      }
+
       console.debug("start game");
       this.$whim.assignState({
         ...this.$whim.state,
         isFirstGame: false,
-        gaming: true
+        loading: true
+      });
+
+      const turnPosition =
+        Math.floor(Math.random() * this.$whim.users.length) + 1;
+
+      // TODO: ピコピコルーレット実装
+      console.debug(turnPosition);
+      this.$whim.assignState({
+        ...this.$whim.state,
+        gaming: true,
+        turnPositionNumber: turnPosition,
+        loading: false
       });
     }
   }
