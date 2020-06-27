@@ -3,8 +3,12 @@
     <div id="mainContainer">
       <Main :mode="mode" />
       <div id="buttonContainer">
-        <NextButton v-if="gaming == true" :onClickHandler="nextPerson" />
-        <GameStartButton v-else :onClickHandler="gameStart" :isFirstGame="isFirstGame" />
+        <NextButton v-if="gameState.gaming == true" :onClickHandler="nextPerson" />
+        <GameStartButton
+          v-else
+          :onClickHandler="gameStart"
+          :isFirstGame="gameState.isFirstGame == true"
+        />
       </div>
     </div>
     <Player
@@ -26,11 +30,23 @@ export default {
     NextButton: () => import("@/components/NextButton/index"),
     GameStartButton: () => import("@/components/GameStartButton/index")
   },
-  data: function() {
-    return {
-      isFirstGame: true,
-      gaming: false
-    };
+  // data: function() {
+  //   return {
+  //     gameState: {
+  //       inited: true,
+  //       isFirstGame: true,
+  //       gaming: false
+  //     }
+  //   };
+  // },
+  mounted: function() {
+    if (this.$whim.state.inited == null) {
+      this.$whim.assignState({
+        inited: true,
+        isFirstGame: true,
+        gaming: false
+      });
+    }
   },
   computed: {
     users() {
@@ -38,10 +54,10 @@ export default {
     },
     mode() {
       return "clockwise";
+    },
+    gameState() {
+      return this.$whim.state;
     }
-    // isFirstGame() {
-    //   return true;
-    // }
   },
   methods: {
     nextPerson() {
@@ -49,8 +65,11 @@ export default {
     },
     gameStart() {
       console.debug("start game");
-      this.isFirstGame = false;
-      this.gaming = true;
+      this.$whim.assignState({
+        ...this.$whim.state,
+        isFirstGame: false,
+        gaming: true
+      });
     }
   }
 };
