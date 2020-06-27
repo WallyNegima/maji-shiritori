@@ -3,7 +3,8 @@
     <div id="mainContainer">
       <Main :mode="mode" />
       <div id="buttonContainer">
-        <NextButton :onClickHandler="nextPerson" />
+        <NextButton v-if="gaming == true" :onClickHandler="nextPerson" />
+        <GameStartButton v-else :onClickHandler="gameStart" :isFirstGame="isFirstGame" />
       </div>
     </div>
     <Player
@@ -22,7 +23,14 @@ export default {
   components: {
     Player: () => import("@/components/Player/index"),
     Main: () => import("@/components/Main/index"),
-    NextButton: () => import("@/components/NextButton/index")
+    NextButton: () => import("@/components/NextButton/index"),
+    GameStartButton: () => import("@/components/GameStartButton/index")
+  },
+  data: function() {
+    return {
+      isFirstGame: true,
+      gaming: false
+    };
   },
   computed: {
     users() {
@@ -31,10 +39,18 @@ export default {
     mode() {
       return "clockwise";
     }
+    // isFirstGame() {
+    //   return true;
+    // }
   },
   methods: {
     nextPerson() {
       console.debug("next!!");
+    },
+    gameStart() {
+      console.debug("start game");
+      this.isFirstGame = false;
+      this.gaming = true;
     }
   }
 };
