@@ -3,8 +3,12 @@
     <div id="mainContainer">
       <Main :mode="mode" />
       <div id="buttonContainer">
-        <NextButton v-if="gaming == true" :onClickHandler="nextPerson" />
-        <GameStartButton v-else :onClickHandler="gameStart" :isFirstGame="isFirstGame" />
+        <NextButton v-if="gameState.gaming == true && myTurn" :onClickHandler="nextPerson" />
+        <GameStartButton
+          v-else-if="gameState.gaming != true"
+          :onClickHandler="gameStart"
+          :isFirstGame="gameState.isFirstGame == true"
+        />
       </div>
     </div>
     <Player
@@ -12,7 +16,8 @@
       :key="user.id"
       :class="whimUserWindowClass(user)"
       :displayUser="user"
-      :isLose="true"
+      :loserPositionIds="[]"
+      :turnPosition="gameState.turnPositionNumber"
     />
   </div>
 </template>
@@ -26,31 +31,60 @@ export default {
     NextButton: () => import("@/components/NextButton/index"),
     GameStartButton: () => import("@/components/GameStartButton/index")
   },
-  data: function() {
-    return {
-      isFirstGame: true,
-      gaming: false
-    };
+  mounted: function() {
+    if (this.$whim.state.inited == null) {
+      this.$whim.assignState({
+        inited: true,
+        isFirstGame: true,
+        gaming: false
+      });
+    }
   },
   computed: {
     users() {
       return this.$whim.usrs;
     },
+    me() {
+      return this.$whim.accessUser;
+    },
     mode() {
       return "clockwise";
+    },
+    gameState() {
+      return this.$whim.state;
+    },
+    myTurn() {
+      return this.gameState.turnPositionNumber == this.me.positionNumber;
     }
-    // isFirstGame() {
-    //   return true;
-    // }
   },
   methods: {
     nextPerson() {
-      console.debug("next!!");
+      this.$whim.assignState({
+        turnPositionNumber:
+          (this.gameState.turnPositionNumber % this.$whim.users.length) + 1
+      });
     },
     gameStart() {
-      console.debug("start game");
-      this.isFirstGame = false;
-      this.gaming = true;
+      if (this.gameState.loading && this.gameState.loading == true) {
+        return;
+      }
+
+      this.$whim.assignState({
+        ...this.$whim.state,
+        isFirstGame: false,
+        loading: true
+      });
+
+      const turnPosition =
+        Math.floor(Math.random() * this.$whim.users.length) + 1;
+
+      // TODO: ピコピコルーレット実装
+      this.$whim.assignState({
+        ...this.$whim.state,
+        gaming: true,
+        turnPositionNumber: turnPosition,
+        loading: false
+      });
     }
   }
 };
