@@ -2,6 +2,9 @@
   <div id="app">
     <div id="mainContainer">
       <Main :mode="mode" />
+      <div id="buttonContainer">
+        <NextButton :onClickHandler="nextPerson" />
+      </div>
     </div>
     <Player
       v-for="user in $whim.users"
@@ -18,7 +21,8 @@ export default {
   name: "App",
   components: {
     Player: () => import("@/components/Player/index"),
-    Main: () => import("@/components/Main/index")
+    Main: () => import("@/components/Main/index"),
+    NextButton: () => import("@/components/NextButton/index")
   },
   computed: {
     users() {
@@ -26,6 +30,11 @@ export default {
     },
     mode() {
       return "clockwise";
+    }
+  },
+  methods: {
+    nextPerson() {
+      console.debug("next!!");
     }
   }
 };
@@ -38,5 +47,12 @@ export default {
   height: 100vh;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  z-index: 1;
+}
+
+#buttonContainer {
+  margin: 24px auto 0;
+  z-index: 1;
 }
 </style>
