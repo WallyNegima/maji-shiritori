@@ -33,12 +33,9 @@ export default {
   },
   computed: {
     displayType() {
-      if (this.isLose) {
+      if (this.loserPositionIds.includes(this.displayUser.positionNumber)) {
         return this.DISPLAY_TYPES.IS_LOSE;
-      } else if (
-        !this.isLose &&
-        this.displayUser.positionNumber == this.turnPosition
-      ) {
+      } else if (this.displayUser.positionNumber == this.turnPosition) {
         return this.DISPLAY_TYPES.IS_TURN;
       } else {
         return this.DISPLAY_TYPES.NONE;
@@ -50,9 +47,13 @@ export default {
 
 <style scoped>
 .loser {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
+  background: rgba(0, 0, 0, 0.6);
 }
 
 .turn {
