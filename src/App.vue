@@ -31,15 +31,6 @@ export default {
     NextButton: () => import("@/components/NextButton/index"),
     GameStartButton: () => import("@/components/GameStartButton/index")
   },
-  // data: function() {
-  //   return {
-  //     gameState: {
-  //       inited: true,
-  //       isFirstGame: true,
-  //       gaming: false
-  //     }
-  //   };
-  // },
   mounted: function() {
     if (this.$whim.state.inited == null) {
       this.$whim.assignState({
@@ -78,7 +69,6 @@ export default {
         return;
       }
 
-      console.debug("start game");
       this.$whim.assignState({
         ...this.$whim.state,
         isFirstGame: false,
@@ -89,7 +79,6 @@ export default {
         Math.floor(Math.random() * this.$whim.users.length) + 1;
 
       // TODO: ピコピコルーレット実装
-      console.debug(turnPosition);
       this.$whim.assignState({
         ...this.$whim.state,
         gaming: true,
