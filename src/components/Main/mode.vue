@@ -21,7 +21,7 @@ export default {
 </script>
 
 <style scoped>
-span {
+div {
   min-width: 15vw;
 }
 </style>
