@@ -276,7 +276,7 @@ export default {
           if (this.checkTimeLimit()) {
             this.iamLose();
             clearInterval(this.interavl);
-            this.goToNext();
+            this.nextPerson();
           }
         }, 1000);
       } else if (oldState == true && newState == false) {
