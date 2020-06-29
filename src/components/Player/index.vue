@@ -4,7 +4,7 @@
     <div v-if="displayType === DISPLAY_TYPES.IS_WIN" class="winner">
       <div>優勝は{{displayUser.name}}</div>
     </div>
-    <div v-else-if="displayType === DISPLAY_TYPES.IS_TURN" class="turn"></div>
+    <div v-else-if="displayType === DISPLAY_TYPES.IS_TURN" class="turn">{{myLife}}</div>
   </div>
 </template>
 
@@ -34,6 +34,9 @@ export default {
     },
     finished: {
       type: Boolean
+    },
+    times: {
+      type: Array
     }
   },
   computed: {
@@ -50,6 +53,9 @@ export default {
       } else {
         return this.DISPLAY_TYPES.NONE;
       }
+    },
+    myLife() {
+      return this.times[this.displayUser.positionNumber - 1];
     }
   }
 };

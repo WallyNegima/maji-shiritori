@@ -19,6 +19,7 @@
       :loserPositionIds="loserPositionIds"
       :turnPosition="gameState.turnPositionNumber"
       :finished="finished"
+      :times="gameState.times"
     />
   </div>
 </template>
@@ -34,7 +35,6 @@ export default {
   },
   data: function() {
     return {
-      turnStartTime: Date.now(),
       interavl: null
     };
   },
@@ -135,14 +135,8 @@ export default {
       });
     },
     checkTimeLimit() {
-      // かかった秒数を求めてローカルステートを更新する
-      // 更新したローカルstateはgoToNext関数でfirebaseのDBにassignされる
-      const spentTime = (Date.now() - this.turnStartTime) / 1000;
-      const lifeTime = this.gameState.times[this.me.positionNumber - 1];
-
       // もし持ち時間がなくなってたらtrueを返す
-      if (lifeTime - spentTime <= 0.0) {
-        this.gameState.times[this.me.positionNumber - 1] -= spentTime;
+      if (this.gameState.times[this.me.positionNumber - 1] <= 0.0) {
         return true;
       } else {
         return false;
@@ -170,7 +164,6 @@ export default {
 
       // もう一度なら回答開始時間を更新してもう一回
       if (nextMode == "onemore") {
-        this.turnStartTime = Date.now();
         return;
       }
 
@@ -268,11 +261,14 @@ export default {
           this.$whim.assignState({ ...this.gameState });
         }
 
-        // 回答開始時間をセット
-        this.turnStartTime = Date.now();
-
         // 毎秒オーバーしてないか確認する処理を追加
         this.interavl = setInterval(() => {
+          // 残り時間から1秒へらす
+          this.gameState.times[this.me.positionNumber - 1] -= 1.0;
+          this.$whim.assignState({
+            times: this.gameState.times
+          });
+
           if (this.checkTimeLimit()) {
             this.iamLose();
             clearInterval(this.interavl);
