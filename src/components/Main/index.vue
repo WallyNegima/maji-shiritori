@@ -3,7 +3,7 @@
     <div v-if="mode == 'initial'">しりとりの「り」から！</div>
     <div v-if="mode == 'clockwise'">時計回り</div>
     <div v-else-if="mode == 'counter-clockwise'">逆時計回り</div>
-    <div v-else-if="mode == 'bounus'">10秒ボーナス</div>
+    <div v-else-if="mode == 'bonus'">10秒ボーナス</div>
     <div v-else-if="mode == 'onemore'">もう一度</div>
     <div v-else-if="mode == 'more-5chars'">5文字以上</div>
     <div v-else-if="mode == 'only-country'">国名縛り</div>

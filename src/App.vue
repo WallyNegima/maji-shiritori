@@ -93,8 +93,21 @@ export default {
         this.iamLose();
       }
 
+      // 1人を除いて皆負けたら終わり
+      if (
+        this.gameState.loserPositionIds &&
+        this.users.length - 1 <= this.gameState.loserPositionIds.length
+      ) {
+        this.finishGame();
+        return;
+      }
+
+      // 次のモードをランダムに決定
+      const nextMode = this.selectNextMode();
+      this.$whim.assignState({ mode: nextMode });
+
       // 次の人へ
-      this.goToNext();
+      this.goToNext(nextMode);
     },
     gameStart() {
       if (this.gameState.loading && this.gameState.loading == true) {
@@ -118,16 +131,19 @@ export default {
         turnPositionNumber: turnPosition,
         loserPositionIds: [], // 空配列で初期化してるけど, 実際はfirebaseの関係でundefinedになる
         loading: false,
-        mode: "clockwise"
+        mode: "clockwise",
+        clockWise: true
       });
     },
     checkTimeLimit() {
       // かかった秒数を求めてローカルステートを更新する
+      // 更新したローカルstateはgoToNext関数でfirebaseのDBにassignされる
       const spentTime = (Date.now() - this.turnStartTime) / 1000;
-      this.gameState.times[this.me.positionNumber - 1] -= spentTime;
+      const lifeTime = this.gameState.times[this.me.positionNumber - 1];
 
       // もし持ち時間がなくなってたらtrueを返す
-      if (this.$whim.state.times[this.me.positionNumber - 1] <= 0.0) {
+      if (lifeTime - spentTime <= 0.0) {
+        this.gameState.times[this.me.positionNumber - 1] -= spentTime;
         return true;
       } else {
         return false;
@@ -145,25 +161,97 @@ export default {
         loserPositionIds: losers
       });
     },
-    goToNext() {
-      if (
-        this.gameState.loserPositionIds &&
-        this.users.length - 1 <= this.gameState.loserPositionIds.length
-      ) {
-        this.finishGame();
+    goToNext(nextMode) {
+      // 時計回り, 反時計周り情報だけ更新する
+      if (nextMode == "clockwise") {
+        this.$whim.assignState({ clockWise: true });
+      } else if (nextMode == "counter-clockwise") {
+        this.$whim.assignState({ clockWise: false });
+      }
+
+      // もう一度なら回答開始時間を更新してもう一回
+      if (nextMode == "onemore") {
+        this.turnStartTime = Date.now();
         return;
       }
-      // 次の人へ
-      this.$whim.assignState({
-        ...this.gameState,
-        turnPositionNumber:
-          (this.gameState.turnPositionNumber % this.$whim.users.length) + 1
-      });
+
+      if (this.gameState.clockWise != true) {
+        // 反時計回りに次の人へ
+        let nextPosition =
+          (this.gameState.turnPositionNumber - 1) % this.users.length;
+        if (nextPosition === 0) {
+          nextPosition = this.users.length;
+        }
+
+        this.$whim.assignState({
+          ...this.gameState,
+          turnPositionNumber: nextPosition
+        });
+      } else {
+        // 時計回りに次の人へ
+        this.$whim.assignState({
+          ...this.gameState,
+          turnPositionNumber:
+            (this.gameState.turnPositionNumber % this.$whim.users.length) + 1
+        });
+      }
+
+      // 次の人が馬上状態だったらもう一回
+      if (this.loserPositionIds.includes(this.gameState.turnPositionNumber)) {
+        this.goToNext(nextMode);
+      }
     },
     finishGame() {
       this.$whim.assignState({
         gaming: false
       });
+    },
+    selectNextMode() {
+      // 次のモードをランダムに決定する
+      const modes = {
+        SONOMAMA: 0.4,
+        HANTEN: 0.5,
+        BONUS: 0.55,
+        ONE_MORE: 0.6,
+        MORE_5CHAR: 0.75,
+        ONLY_COUNTRY: 0.9,
+        GOOD_VOICE: 1.0
+      };
+      const rand = Math.random();
+
+      if (rand <= modes.SONOMAMA) {
+        if (this.mode == "cloclwise") {
+          return "clockwise";
+        } else {
+          return "counter-clockwise";
+        }
+      } else if (rand <= modes.HANTEN) {
+        if (this.mode == "cloclwise") {
+          return "counter-clockwise";
+        } else {
+          return "clockwise";
+        }
+      } else if (rand <= modes.BONUS) {
+        return "bonus";
+      } else if (rand <= modes.ONE_MORE) {
+        if (
+          this.gameState.loserPositionIds &&
+          this.gameState.loserPositionIds.includes(this.me.positionNumber)
+        ) {
+          if (this.mode == "cloclwise") {
+            return "clockwise";
+          } else {
+            return "counter-clockwise";
+          }
+        }
+        return "onemore";
+      } else if (rand <= modes.MORE_5CHAR) {
+        return "more-5chars";
+      } else if (rand <= modes.ONLY_COUNTRY) {
+        return "only-country";
+      } else {
+        return "good-voice";
+      }
     }
   },
   watch: {
@@ -173,9 +261,18 @@ export default {
         return;
       }
 
-      // 毎秒オーバーしてないか確認する.
+      // 自分のターンが回ってきたときに行う処理
       if (newState == true) {
+        // modeがBONUSなら10秒持ち時間に追加する
+        if (this.mode == "bonus") {
+          this.gameState.times[this.me.positionNumber - 1] += 10;
+          this.$whim.assignState({ ...this.gameState });
+        }
+
+        // 回答開始時間をセット
         this.turnStartTime = Date.now();
+
+        // 毎秒オーバーしてないか確認する処理を追加
         this.interavl = setInterval(() => {
           if (this.checkTimeLimit()) {
             this.iamLose();
