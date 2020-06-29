@@ -55,7 +55,11 @@ export default {
       return this.$whim.accessUser;
     },
     mode() {
-      return "clockwise";
+      if (this.gameState.mode == null) {
+        return "initial";
+      } else {
+        return "cloclwise";
+      }
     },
     gameState() {
       return this.$whim.state;
@@ -113,7 +117,8 @@ export default {
         times: this.$whim.users.map(() => 60),
         turnPositionNumber: turnPosition,
         loserPositionIds: [], // 空配列で初期化してるけど, 実際はfirebaseの関係でundefinedになる
-        loading: false
+        loading: false,
+        mode: "clockwise"
       });
     },
     checkTimeLimit() {

@@ -1,5 +1,6 @@
 <template>
   <div id="main">
+    <div v-if="mode == 'initial'">しりとりの「り」から！</div>
     <div v-if="mode == 'clockwise'">時計回り</div>
     <div v-else-if="mode == 'counter-clockwise'">逆時計回り</div>
     <div v-else-if="mode == 'bounus'">10秒ボーナス</div>
@@ -32,5 +33,9 @@ export default {
   height: 12.014vw;
   background: rgba(255, 255, 255, 0.7);
   border-radius: 0.833vw;
+  font-size: 2.8vw;
+  font-weight: bold;
+  text-align: center;
+  color: #ff002e;
 }
 </style>
