@@ -22,7 +22,7 @@ export default {
 <style scoped>
 #startButton {
   font-weight: bold;
-  font-size: 2.778vw;
+  font-size: 2vw;
   line-height: 3.264vw;
   color: #ffffff;
   width: 18.056vw;

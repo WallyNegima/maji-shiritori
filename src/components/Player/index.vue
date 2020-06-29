@@ -3,6 +3,9 @@
     <div v-if="displayType === DISPLAY_TYPES.IS_LOSE" class="loser">
       <div>負けなう</div>
     </div>
+    <div v-if="displayType === DISPLAY_TYPES.IS_WIN" class="winner">
+      <div>優勝は{{displayUser.name}}</div>
+    </div>
     <div v-else-if="displayType === DISPLAY_TYPES.IS_TURN" class="turn"></div>
   </div>
 </template>
@@ -15,6 +18,7 @@ export default {
       DISPLAY_TYPES: {
         IS_LOSE: "isLose",
         IS_TURN: "isTurn",
+        IS_WIN: "isWin",
         NONE: "none"
       }
     };
@@ -29,12 +33,20 @@ export default {
     },
     turnPosition: {
       type: Number
+    },
+    finished: {
+      type: Boolean
     }
   },
   computed: {
     displayType() {
       if (this.loserPositionIds.includes(this.displayUser.positionNumber)) {
         return this.DISPLAY_TYPES.IS_LOSE;
+      } else if (
+        this.finished &&
+        !this.loserPositionIds.includes(this.displayUser.positionNumber)
+      ) {
+        return this.DISPLAY_TYPES.IS_WIN;
       } else if (this.displayUser.positionNumber == this.turnPosition) {
         return this.DISPLAY_TYPES.IS_TURN;
       } else {

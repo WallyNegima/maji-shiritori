@@ -12,12 +12,13 @@
       </div>
     </div>
     <Player
-      v-for="user in $whim.users"
+      v-for="user in users"
       :key="user.id"
       :class="whimUserWindowClass(user)"
       :displayUser="user"
       :loserPositionIds="loserPositionIds"
       :turnPosition="gameState.turnPositionNumber"
+      :finished="finished"
     />
   </div>
 </template>
@@ -68,6 +69,18 @@ export default {
     },
     myTurn() {
       return this.gameState.turnPositionNumber == this.me.positionNumber;
+    },
+    finished() {
+      if (
+        this.gameState.isFirstGame == false &&
+        this.gameState.gaming == false &&
+        this.gameState.loserPositionIds &&
+        this.users.length - 1 <= this.gameState.loserPositionIds.length
+      ) {
+        return true;
+      } else {
+        return false;
+      }
     }
   },
   methods: {
@@ -94,9 +107,6 @@ export default {
       const turnPosition =
         Math.floor(Math.random() * this.$whim.users.length) + 1;
 
-      console.debug({ turnPosition });
-      console.debug(this.me.positionNumber);
-
       // TODO: ピコピコルーレット実装
       this.$whim.assignState({
         gaming: true,
@@ -119,7 +129,6 @@ export default {
       }
     },
     iamLose() {
-      console.debug("i am lose");
       // 自分を負け状態にする
       // 空配列で初期化したけど, firebaseの関係でundefinedになるので,一人目の敗北者だったら空配列作る
       let losers = this.$whim.state.loserPositionIds;
