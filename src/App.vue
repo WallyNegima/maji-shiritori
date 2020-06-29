@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div id="mainContainer">
-      <Main :mode="mode" />
+      <Main :mode="mode" :isCW="gameState.clockWise == true" />
       <div id="buttonContainer">
         <NextButton v-if="gameState.gaming == true && myTurn" :onClickHandler="nextPerson" />
         <GameStartButton
