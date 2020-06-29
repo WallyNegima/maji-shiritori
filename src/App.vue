@@ -33,7 +33,8 @@ export default {
   },
   data: function() {
     return {
-      turnStartTime: Date.now()
+      turnStartTime: Date.now(),
+      interavl: null
     };
   },
   mounted: function() {
@@ -47,7 +48,7 @@ export default {
   },
   computed: {
     users() {
-      return this.$whim.usrs;
+      return this.$whim.users;
     },
     me() {
       return this.$whim.accessUser;
@@ -71,29 +72,12 @@ export default {
   },
   methods: {
     nextPerson() {
-      // かかった秒数を求める
-      const spentTime = (Date.now() - this.turnStartTime) / 1000;
-      this.gameState.times[this.me.positionNumber - 1] -= spentTime;
-
-      // もし60秒オーバーしてたら終了
-      if (this.$whim.state.times[this.me.positionNumber - 1] <= 0.0) {
-        // 空配列で初期化したけど, firebaseの関係でundefinedになるので,一人目の敗北者だったら空配列作る
-        let losers = this.$whim.state.loserPositionIds;
-        if (losers == null) {
-          losers = [];
-        }
-        losers.push(this.me.positionNumber);
-        this.$whim.assignState({
-          loserPositionIds: losers
-        });
+      if (this.checkTimeLimit()) {
+        this.iamLose();
       }
 
       // 次の人へ
-      this.$whim.assignState({
-        ...this.gameState,
-        turnPositionNumber:
-          (this.gameState.turnPositionNumber % this.$whim.users.length) + 1
-      });
+      this.goToNext();
     },
     gameStart() {
       if (this.gameState.loading && this.gameState.loading == true) {
@@ -110,6 +94,9 @@ export default {
       const turnPosition =
         Math.floor(Math.random() * this.$whim.users.length) + 1;
 
+      console.debug({ turnPosition });
+      console.debug(this.me.positionNumber);
+
       // TODO: ピコピコルーレット実装
       this.$whim.assignState({
         gaming: true,
@@ -118,12 +105,72 @@ export default {
         loserPositionIds: [], // 空配列で初期化してるけど, 実際はfirebaseの関係でundefinedになる
         loading: false
       });
+    },
+    checkTimeLimit() {
+      // かかった秒数を求めてローカルステートを更新する
+      const spentTime = (Date.now() - this.turnStartTime) / 1000;
+      this.gameState.times[this.me.positionNumber - 1] -= spentTime;
+
+      // もし持ち時間がなくなってたらtrueを返す
+      if (this.$whim.state.times[this.me.positionNumber - 1] <= 0.0) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    iamLose() {
+      console.debug("i am lose");
+      // 自分を負け状態にする
+      // 空配列で初期化したけど, firebaseの関係でundefinedになるので,一人目の敗北者だったら空配列作る
+      let losers = this.$whim.state.loserPositionIds;
+      if (losers == null) {
+        losers = [];
+      }
+      losers.push(this.me.positionNumber);
+      this.$whim.assignState({
+        loserPositionIds: losers
+      });
+    },
+    goToNext() {
+      if (
+        this.gameState.loserPositionIds &&
+        this.users.length - 1 <= this.gameState.loserPositionIds.length
+      ) {
+        this.finishGame();
+        return;
+      }
+      // 次の人へ
+      this.$whim.assignState({
+        ...this.gameState,
+        turnPositionNumber:
+          (this.gameState.turnPositionNumber % this.$whim.users.length) + 1
+      });
+    },
+    finishGame() {
+      this.$whim.assignState({
+        gaming: false
+      });
     }
   },
   watch: {
-    myTurn: function(newState) {
+    myTurn: function(newState, oldState) {
+      if (this.gameState.gaming == false) {
+        clearInterval(this.interavl);
+        return;
+      }
+
+      // 毎秒オーバーしてないか確認する.
       if (newState == true) {
         this.turnStartTime = Date.now();
+        this.interavl = setInterval(() => {
+          if (this.checkTimeLimit()) {
+            this.iamLose();
+            clearInterval(this.interavl);
+            this.goToNext();
+          }
+        }, 1000);
+      } else if (oldState == true && newState == false) {
+        clearInterval(this.interavl);
       }
     }
   }
