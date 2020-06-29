@@ -58,7 +58,7 @@ export default {
       if (this.gameState.mode == null) {
         return "initial";
       } else {
-        return "cloclwise";
+        return this.gameState.mode;
       }
     },
     gameState() {
