@@ -56,6 +56,7 @@ export default {
   font-weight: bold;
   text-align: center;
   color: #ff002e;
+  z-index: 5;
 }
 
 #cycle {

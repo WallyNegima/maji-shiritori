@@ -1,10 +1,21 @@
 <template>
   <div class="container">
+    <div
+      v-show="(displayType !== DISPLAY_TYPES.IS_LOSE) && (displayType !== DISPLAY_TYPES.IS_WIN)"
+      :style="{height: myLife,
+      zIndex: 1,
+      background: 'black',
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      width: '100%',
+      }"
+    >{{myLife}}</div>
     <div v-if="displayType === DISPLAY_TYPES.IS_LOSE" class="loser">負け</div>
     <div v-if="displayType === DISPLAY_TYPES.IS_WIN" class="winner">
       <div>優勝は{{displayUser.name}}</div>
     </div>
-    <div v-else-if="displayType === DISPLAY_TYPES.IS_TURN" class="turn">{{myLife}}</div>
+    <div v-else-if="displayType === DISPLAY_TYPES.IS_TURN" class="turn"></div>
   </div>
 </template>
 
@@ -55,7 +66,16 @@ export default {
       }
     },
     myLife() {
-      return this.times[this.displayUser.positionNumber - 1];
+      if (this.times == null) {
+        return "0%";
+      }
+      const myLife = this.times[this.displayUser.positionNumber - 1];
+      return `${(1 - myLife / 60) * 100}%`;
+    },
+    stypes() {
+      return {
+        "--life": this.myLife
+      };
     }
   }
 };
@@ -83,5 +103,9 @@ export default {
   box-sizing: border-box;
   width: 100%;
   height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
 }
 </style>
