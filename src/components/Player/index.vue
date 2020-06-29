@@ -1,8 +1,6 @@
 <template>
   <div class="container">
-    <div v-if="displayType === DISPLAY_TYPES.IS_LOSE" class="loser">
-      <div>負けなう</div>
-    </div>
+    <div v-if="displayType === DISPLAY_TYPES.IS_LOSE" class="loser">負け</div>
     <div v-if="displayType === DISPLAY_TYPES.IS_WIN" class="winner">
       <div>優勝は{{displayUser.name}}</div>
     </div>
@@ -66,6 +64,12 @@ export default {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.6);
+  font-style: normal;
+  font-weight: bold;
+  font-size: 14.067vw;
+  line-height: 20vw;
+
+  color: #ffffff;
 }
 
 .turn {
