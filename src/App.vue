@@ -7,7 +7,7 @@
         <GameStartButton
           v-else-if="gameState.gaming != true"
           :onClickHandler="gameStart"
-          :isFirstGame="gameState.isFirstGame == true"
+          :isFirstGame="gameState.isFirstGame == true || gameState.isFirstGame == null"
         />
       </div>
     </div>
@@ -113,7 +113,6 @@ export default {
       if (this.gameState.loading && this.gameState.loading == true) {
         return;
       }
-      this.$whim.resetState();
 
       this.$whim.assignState({
         ...this.$whim.state,
@@ -284,6 +283,9 @@ export default {
         clearInterval(this.interavl);
       }
     }
+  },
+  destroyed() {
+    this.$whim.resetState();
   }
 };
 </script>
