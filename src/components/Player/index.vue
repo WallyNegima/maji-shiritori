@@ -12,9 +12,7 @@
       }"
     >{{myLife}}</div>
     <div v-if="displayType === DISPLAY_TYPES.IS_LOSE" class="loser">負け</div>
-    <div v-if="displayType === DISPLAY_TYPES.IS_WIN" class="winner">
-      <div>優勝は{{displayUser.name}}</div>
-    </div>
+    <div v-if="displayType === DISPLAY_TYPES.IS_WIN" class="winner"></div>
     <div v-else-if="displayType === DISPLAY_TYPES.IS_TURN" class="turn"></div>
   </div>
 </template>
