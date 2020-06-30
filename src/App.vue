@@ -292,7 +292,12 @@ export default {
       if (newState == true) {
         // modeがBONUSなら10秒持ち時間に追加する
         if (this.mode == "bonus") {
-          this.gameState.times[this.me.positionNumber - 1] += 10;
+          // 60秒以上になりそうなら60秒にセット
+          if (this.gameState.times[this.me.positionNumber - 1] + 10 >= 60) {
+            this.gameState.times[this.me.positionNumber - 1] = 60;
+          } else {
+            this.gameState.times[this.me.positionNumber - 1] += 10;
+          }
           this.$whim.assignState({ ...this.gameState });
         }
 
