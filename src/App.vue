@@ -2,7 +2,10 @@
   <div id="app">
     <div id="mainContainer">
       <Main :mode="mode" :isCW="gameState.clockWise == true" />
-      <div id="buttonContainer">
+      <div
+        id="buttonContainer"
+        v-show="gameState.loading == null || gameState.loading == false && blink ==false"
+      >
         <NextButton v-if="gameState.gaming == true && myTurn" :onClickHandler="nextPerson" />
         <GameStartButton
           v-else-if="gameState.gaming != true"
@@ -35,7 +38,8 @@ export default {
   },
   data: function() {
     return {
-      interavl: null
+      interval: null,
+      rouletteInterval: null
     };
   },
   mounted: function() {
@@ -85,6 +89,15 @@ export default {
       } else {
         return false;
       }
+    },
+    loading() {
+      return this.gameState.loading;
+    },
+    gaming() {
+      return this.gameState.gaming;
+    },
+    blink() {
+      return this.gameState.blink;
     }
   },
   methods: {
@@ -114,25 +127,33 @@ export default {
         return;
       }
 
+      // みんなにルーレットの司令
       this.$whim.assignState({
         ...this.$whim.state,
         isFirstGame: false,
         loading: true
       });
 
+      // 最初の人を決める
       const turnPosition =
         Math.floor(Math.random() * this.$whim.users.length) + 1;
-
-      // TODO: ピコピコルーレット実装
+      // 最初の人を皆に通知
       this.$whim.assignState({
-        gaming: true,
         times: this.$whim.users.map(() => 60),
         turnPositionNumber: turnPosition,
         loserPositionIds: [], // 空配列で初期化してるけど, 実際はfirebaseの関係でundefinedになる
-        loading: false,
         mode: "clockwise",
         clockWise: true
       });
+
+      // ルーレット止める指令
+      setTimeout(() => {
+        this.$whim.assignState({
+          gaming: true,
+          blink: true,
+          loading: false
+        });
+      }, 3000);
     },
     checkTimeLimit() {
       // もし持ち時間がなくなってたらtrueを返す
@@ -249,7 +270,7 @@ export default {
   watch: {
     myTurn: function(newState, oldState) {
       if (this.gameState.gaming == false) {
-        clearInterval(this.interavl);
+        clearInterval(this.interval);
         return;
       }
 
@@ -262,7 +283,7 @@ export default {
         }
 
         // 毎秒オーバーしてないか確認する処理を追加
-        this.interavl = setInterval(() => {
+        this.interval = setInterval(() => {
           // 残り時間から1秒へらす
           this.gameState.times[this.me.positionNumber - 1] -= 1.0;
           this.$whim.assignState({
@@ -271,12 +292,66 @@ export default {
 
           if (this.checkTimeLimit()) {
             this.iamLose();
-            clearInterval(this.interavl);
+            clearInterval(this.interval);
             this.nextPerson();
           }
         }, 1000);
       } else if (oldState == true && newState == false) {
-        clearInterval(this.interavl);
+        clearInterval(this.interval);
+      }
+    },
+    loading: function(newLoading) {
+      // loadingがtrueになったらルーレット回す. falseになったらルーレット止める
+      if (newLoading == true) {
+        // ルーレット
+        this.rouletteInterval = setInterval(() => {
+          if (this.gameState.turnPositionNumber == null) {
+            this.gameState.turnPositionNumber = 1;
+            this.$whim.assignState({
+              ...this.gameState
+            });
+            return;
+          }
+          this.gameState.turnPositionNumber =
+            (this.gameState.turnPositionNumber % this.users.length) + 1;
+          this.$whim.assignState({
+            ...this.gameState
+          });
+        }, 500);
+      } else if (newLoading == false) {
+        clearInterval(this.rouletteInterval);
+      }
+    },
+    gaming(newGaming, oldGaming) {
+      // loadingがfalseになって, gamingがtrueになったら点滅させる
+      if (
+        oldGaming == false &&
+        newGaming == true &&
+        this.gameState.loading == false &&
+        this.blink == true
+      ) {
+        let truePosition = this.gameState.turnPositionNumber;
+        const interval = setInterval(() => {
+          if (this.$whim.state.turnPositionNumber == -1) {
+            this.$whim.assignState({
+              turnPositionNumber: truePosition
+            });
+          } else {
+            this.$whim.assignState({
+              turnPositionNumber: -1
+            });
+          }
+        }, 500);
+
+        setTimeout(() => {
+          this.$whim.assignState({
+            turnPositionNumber: truePosition,
+            gaming: true,
+            blink: false,
+            loding: false
+          });
+          clearInterval(interval);
+        }, 3000);
       }
     }
   },
