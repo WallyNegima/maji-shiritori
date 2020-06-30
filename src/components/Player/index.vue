@@ -4,13 +4,13 @@
       v-show="(displayType !== DISPLAY_TYPES.IS_LOSE) && (displayType !== DISPLAY_TYPES.IS_WIN)"
       :style="{height: myLife,
       zIndex: 1,
-      background: 'black',
+      background: 'rgba(0, 0, 0, 0.6)',
       position: 'absolute',
       top: '0',
       left: '0',
       width: '100%',
       }"
-    >{{myLife}}</div>
+    ></div>
     <div v-if="displayType === DISPLAY_TYPES.IS_LOSE" class="loser">負け</div>
     <div v-if="displayType === DISPLAY_TYPES.IS_WIN" class="winner"></div>
     <div v-else-if="displayType === DISPLAY_TYPES.IS_TURN" class="turn"></div>
