@@ -1,7 +1,8 @@
 <template>
   <div id="main">
     <div id="cycle" v-if="mode == 'initial'">しりとりの「り」から！</div>
-    <div id="cycle" v-if="mode != 'initial' && isCW === true">
+    <div v-else-if="mode != 'initial' && winner != -1">優勝は{{winner.name}}!</div>
+    <div id="cycle" v-else-if="mode != 'initial' && isCW === true">
       <img id="right" src="@/assets/triangle.png" />
       <div id="wrapper">
         <img id="up" src="@/assets/triangle.png" />
@@ -36,7 +37,8 @@ export default {
     isCW: {
       type: Boolean,
       required: true
-    }
+    },
+    winner: {}
   }
 };
 </script>

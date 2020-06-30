@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div id="mainContainer">
-      <Main :mode="mode" :isCW="gameState.clockWise == true" />
+      <Main :mode="mode" :isCW="gameState.clockWise == true" :winner="winner" />
       <div
         id="buttonContainer"
         v-show="gameState.loading == null || gameState.loading == false && blink ==false"
@@ -98,6 +98,20 @@ export default {
     },
     blink() {
       return this.gameState.blink;
+    },
+    winner() {
+      if (this.finished == true) {
+        let winnerUser = -1;
+        this.users.forEach(u => {
+          if (!this.loserPositionIds.includes(u.positionNumber)) {
+            winnerUser = u;
+          }
+        });
+
+        return winnerUser;
+      } else {
+        return -1;
+      }
     }
   },
   methods: {
@@ -310,14 +324,11 @@ export default {
             this.$whim.assignState({
               ...this.gameState
             });
-            return;
+          } else {
+            this.gameState.turnPositionNumber =
+              (this.gameState.turnPositionNumber % this.users.length) + 1;
           }
-          this.gameState.turnPositionNumber =
-            (this.gameState.turnPositionNumber % this.users.length) + 1;
-          this.$whim.assignState({
-            ...this.gameState
-          });
-        }, 500);
+        }, 300);
       } else if (newLoading == false) {
         clearInterval(this.rouletteInterval);
       }
@@ -332,14 +343,10 @@ export default {
       ) {
         let truePosition = this.gameState.turnPositionNumber;
         const interval = setInterval(() => {
-          if (this.$whim.state.turnPositionNumber == -1) {
-            this.$whim.assignState({
-              turnPositionNumber: truePosition
-            });
+          if (this.gameState.turnPositionNumber == -1) {
+            this.gameState.turnPositionNumber = truePosition;
           } else {
-            this.$whim.assignState({
-              turnPositionNumber: -1
-            });
+            this.gameState.turnPositionNumber = -1;
           }
         }, 500);
 
