@@ -184,10 +184,14 @@ export default {
       if (losers == null) {
         losers = [];
       }
-      losers.push(this.me.positionNumber);
-      this.$whim.assignState({
-        loserPositionIds: losers
-      });
+
+      // losersの中に自分のIDが入ってなければ追加する
+      if (!losers.includes(this.me.positionNumber)) {
+        losers.push(this.me.positionNumber);
+        this.$whim.assignState({
+          loserPositionIds: losers
+        });
+      }
     },
     goToNext(nextMode) {
       // 時計回り, 反時計周り情報だけ更新する
