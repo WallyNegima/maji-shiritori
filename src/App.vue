@@ -245,7 +245,9 @@ export default {
         BONUS: 0.55,
         ONE_MORE: 0.6,
         MORE_5CHAR: 0.75,
-        ONLY_COUNTRY: 0.9,
+        ONLY_FOOD: 0.8,
+        ONLY_PLACE: 0.9,
+        FALSETTO_VOICE: 0.92,
         GOOD_VOICE: 1.0
       };
       const rand = Math.random();
@@ -278,8 +280,12 @@ export default {
         return "onemore";
       } else if (rand <= modes.MORE_5CHAR) {
         return "more-5chars";
-      } else if (rand <= modes.ONLY_COUNTRY) {
-        return "only-country";
+      } else if (rand <= modes.ONLY_FOOD) {
+        return "only-food";
+      } else if (rand <= modes.ONLY_PLACE) {
+        return "only-place";
+      } else if (rand <= modes.FALSETTO_VOICE) {
+        return "falsetto-voice";
       } else {
         return "good-voice";
       }

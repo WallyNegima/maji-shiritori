@@ -5,7 +5,9 @@
     <span v-else-if="mode == 'bonus'">10秒ボーナス</span>
     <span v-else-if="mode == 'onemore'">もう一度</span>
     <span v-else-if="mode == 'more-5chars'">5文字以上</span>
-    <span v-else-if="mode == 'only-country'">国名縛り</span>
+    <span v-else-if="mode == 'only-food'">食べ物縛り</span>
+    <span v-else-if="mode == 'only-place'">地名縛り</span>
+    <span v-else-if="mode == 'falsetto-voice'">きれいな裏声で</span>
     <span v-else-if="mode == 'good-voice'">野太い声で</span>
   </div>
 </template>
